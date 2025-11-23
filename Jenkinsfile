@@ -83,10 +83,16 @@ pipeline {
             echo 'Pipeline failed!'
         }
         always {
-            node('any') {
-                script {
+            script {
+                try {
                     echo 'Cleaning up...'
-                    bat 'docker logout || exit 0'
+                    if (isUnix()) {
+                        sh 'docker logout || true'
+                    } else {
+                        bat 'docker logout || exit 0'
+                    }
+                } catch (Exception e) {
+                    echo "Cleanup warning: ${e.getMessage()}"
                 }
             }
         }
