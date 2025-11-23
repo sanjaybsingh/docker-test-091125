@@ -78,18 +78,16 @@ pipeline {
     post {
         success {
             echo 'Pipeline completed successfully!'
-            script {
-                echo "Deployed image: ${env.DOCKER_IMAGE}:${env.IMAGE_TAG}"
-            }
         }
         failure {
             echo 'Pipeline failed!'
         }
         always {
-            script {
-                echo 'Cleaning up Docker images...'
-                bat "docker rmi ${env.DOCKER_IMAGE}:${env.IMAGE_TAG} || exit 0"
-                bat 'docker logout'
+            node('any') {
+                script {
+                    echo 'Cleaning up...'
+                    bat 'docker logout || exit 0'
+                }
             }
         }
     }
