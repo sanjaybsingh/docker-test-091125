@@ -52,7 +52,7 @@ pipeline {
                 script {
                     echo 'Updating Kubernetes deployment...'
                     // Use kubeconfig credentials for Docker Desktop
-                    withCredentials([file(credentialsId: 'kubeconfig-dockerdesktop', variable: 'KUBECONFIG')]) {
+                    withCredentials([file(credentialsId: 'kubeconfig-credentials', variable: 'KUBECONFIG')]) {
                         sh """
                             export KUBECONFIG=\${KUBECONFIG}
                             kubectl config use-context docker-desktop
