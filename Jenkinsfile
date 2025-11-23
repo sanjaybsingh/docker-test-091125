@@ -51,11 +51,16 @@ pipeline {
             steps {
                 script {
                     echo 'Updating Kubernetes deployment...'
-                    sh """
-                        kubectl apply -f deployment.yaml
-                        kubectl set image deployment/nginx-deployment nginx=${DOCKER_IMAGE}:${IMAGE_TAG}
-                        kubectl rollout status deployment/nginx-deployment
-                    """
+                    // Use kubeconfig credentials for Docker Desktop
+                    withCredentials([file(credentialsId: 'kubeconfig-dockerdesktop', variable: 'KUBECONFIG')]) {
+                        sh """
+                            export KUBECONFIG=\${KUBECONFIG}
+                            kubectl config use-context docker-desktop
+                            kubectl apply -f deployment.yaml
+                            kubectl set image deployment/nginx-deployment nginx=${DOCKER_IMAGE}:${IMAGE_TAG}
+                            kubectl rollout status deployment/nginx-deployment
+                        """
+                    }
                 }
             }
         }
@@ -64,11 +69,14 @@ pipeline {
             steps {
                 script {
                     echo 'Verifying deployment...'
-                    sh """
-                        kubectl get deployments
-                        kubectl get pods -l app=nginx
-                        kubectl get services nginx-service
-                    """
+                    withCredentials([file(credentialsId: 'kubeconfig-credentials', variable: 'KUBECONFIG')]) {
+                        sh """
+                            export KUBECONFIG=\${KUBECONFIG}
+                            kubectl get deployments
+                            kubectl get pods -l app=nginx
+                            kubectl get services nginx-service
+                        """
+                    }
                 }
             }
         }
