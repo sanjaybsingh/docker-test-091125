@@ -2,7 +2,6 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('dockerhub-credentials') // Configure in Jenkins
         DOCKER_IMAGE = 'sanjaybsingh/nginx-app'
         IMAGE_TAG = "${BUILD_NUMBER}"
         KUBECONFIG_CREDENTIALS = credentials('kubeconfig') // Configure in Jenkins
@@ -30,7 +29,11 @@ pipeline {
             steps {
                 script {
                     echo 'Logging into Docker Hub...'
-                    bat "echo %DOCKER_HUB_CREDENTIALS_PSW% | docker login -u %DOCKER_HUB_CREDENTIALS_USR% --password-stdin"
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', 
+                                                      usernameVariable: 'DOCKER_USER', 
+                                                      passwordVariable: 'DOCKER_PASS')]) {
+                        bat "echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin"
+                    }
                 }
             }
         }
