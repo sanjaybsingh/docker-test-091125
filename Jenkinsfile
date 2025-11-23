@@ -4,7 +4,6 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'sanjaybsingh/nginx-app'
         IMAGE_TAG = "${BUILD_NUMBER}"
-        KUBECONFIG_CREDENTIALS = credentials('kubeconfig') // Configure in Jenkins
     }
     
     stages {
