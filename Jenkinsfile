@@ -18,8 +18,8 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image: ${DOCKER_IMAGE}:${IMAGE_TAG}"
-                    bat "docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} ."
-                    bat "docker tag ${DOCKER_IMAGE}:${IMAGE_TAG} ${DOCKER_IMAGE}:latest"
+                    sh "docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} ."
+                    sh "docker tag ${DOCKER_IMAGE}:${IMAGE_TAG} ${DOCKER_IMAGE}:latest"
                 }
             }
         }
@@ -31,7 +31,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', 
                                                       usernameVariable: 'DOCKER_USER', 
                                                       passwordVariable: 'DOCKER_PASS')]) {
-                        bat "echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin"
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                     }
                 }
             }
@@ -41,8 +41,8 @@ pipeline {
             steps {
                 script {
                     echo "Pushing Docker image to Docker Hub..."
-                    bat "docker push ${DOCKER_IMAGE}:${IMAGE_TAG}"
-                    bat "docker push ${DOCKER_IMAGE}:latest"
+                    sh "docker push ${DOCKER_IMAGE}:${IMAGE_TAG}"
+                    sh "docker push ${DOCKER_IMAGE}:latest"
                 }
             }
         }
@@ -51,7 +51,7 @@ pipeline {
             steps {
                 script {
                     echo 'Updating Kubernetes deployment...'
-                    bat """
+                    sh """
                         kubectl apply -f deployment.yaml
                         kubectl set image deployment/nginx-deployment nginx=${DOCKER_IMAGE}:${IMAGE_TAG}
                         kubectl rollout status deployment/nginx-deployment
@@ -64,7 +64,7 @@ pipeline {
             steps {
                 script {
                     echo 'Verifying deployment...'
-                    bat """
+                    sh """
                         kubectl get deployments
                         kubectl get pods -l app=nginx
                         kubectl get services nginx-service
